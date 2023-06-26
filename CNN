@@ -1,0 +1,36 @@
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+#using cifar10 dataset, loading the data and preprocessing it by changing the data type to float32 (as float32 is more efficient and has better computational speed) and dividing it by 255 for normalizing for consistent pixel values in all images.
+(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
+
+# CNN model
+# I am using a combination of conv and maxpool layers and at the end there are fully connected layers
+model = keras.Sequential([layers.Conv2D(32, (3, 3), activation="relu", input_shape=(32, 32, 3)), layers.MaxPooling2D((2, 2)), layers.Conv2D(64, (3, 3), activation="relu"), layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(128, (3, 3), activation="relu"), layers.MaxPooling2D((2, 2)),
+    
+    # Flatten the 3D feature maps to 1D
+    layers.Flatten(),
+    
+    # Fully connected layers
+    layers.Dense(128, activation="relu"),
+    layers.Dense(10),
+])
+
+# Compiling the model. 
+
+model.compile(
+    optimizer="adam",
+    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    metrics=["accuracy"],
+)
+
+# Training the model
+model.fit(x_train, y_train, epochs=10, batch_size=64, verbose=2)
+
+# Evaluating the model
+_, test_acc = model.evaluate(x_test, y_test, verbose=2)
+print("Test accuracy:", test_acc)
